@@ -1,7 +1,7 @@
 """
 File: martelli_algorithm_1.py
 Author: Gavin Vogt
-This program implements Algorithm 1 as given by Martelli in the
+This program implements Algorithm 1 as given by Martelli and Montanari in the
 1982 paper "An Efficient Unification Algorithm"
 """
 
