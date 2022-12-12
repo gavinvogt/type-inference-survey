@@ -316,11 +316,11 @@ def main():
         ]
     )
 
-    print("TERMS:")
+    print("EXAMPLE 1:")
     unify(terms)
 
     print("-" * 60)
-    print("TERMS 2:")
+    print("EXAMPLE 2:")
     unify(terms2)
 
 
