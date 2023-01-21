@@ -5,7 +5,7 @@ This program implements Algorithm 1 as given by Martelli and Montanari in the
 1982 paper "An Efficient Unification Algorithm"
 """
 
-
+from itertools import chain
 from terms import Term, Variable, Application
 from util import occurs, substitute
 
@@ -75,11 +75,7 @@ def unify(equations: set[Equation]):
                 raise Exception(f"{left} occurs in {right}")
             else:
                 # Apply variable elimination
-                for equation in equations:
-                    # Apply the left -> right substitution to each side of the equation
-                    equation.left = substitute(equation.left, left, right)
-                    equation.right = substitute(equation.right, left, right)
-                for equation in no_transformation:
+                for equation in chain(equations, no_transformation):
                     # Apply the left -> right substitution to each side of the equation
                     equation.left = substitute(equation.left, left, right)
                     equation.right = substitute(equation.right, left, right)
