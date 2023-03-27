@@ -6,8 +6,9 @@ This program crudely implements the basic algorithm given by Robinson in the
 """
 
 
-from terms import Term, Variable, Application, Constant
+from terms import Term, Variable
 from util import occurs, substitute, apply_substitution
+from parse_term import parse_term
 
 
 def substitution_all(terms: set[Term], substitution: dict[str, Term]):
@@ -73,50 +74,18 @@ def unify(terms: set[Term]):
 def main():
     # x1
     # f(x2, g(x4), x3, x5)
-    # f(x3, g(a),  b,  x6)
+    # f(x3, g(A),  B,  x6)
     terms = {
-        Variable("x1"),
-        Application(
-            "f",
-            [
-                Variable("x2"),
-                Application("g", [Variable("x4")]),
-                Variable("x3"),
-                Variable("x5"),
-            ],
-        ),
-        Application(
-            "f",
-            [
-                Variable("x3"),
-                Application("g", [Constant("a")]),
-                Constant("b"),
-                Variable("x6"),
-            ],
-        ),
+        parse_term("x1"),
+        parse_term("f(x2, g(x4), x3, x5)"),
+        parse_term("f(x3, g(A),  B,  x6)"),
     }
 
     # f( x1,  h(x1), x2, g(x2))"
     # f(g(x3), x4,   x3,  x1)"
     terms2 = {
-        Application(
-            "f",
-            [
-                Variable("x1"),
-                Application("h", [Variable("x1")]),
-                Variable("x2"),
-                Application("g", [Variable("x2")]),
-            ],
-        ),
-        Application(
-            "f",
-            [
-                Application("g", [Variable("x3")]),
-                Variable("x4"),
-                Variable("x3"),
-                Variable("x1"),
-            ],
-        ),
+        parse_term("f( x1,  h(x1), x2, g(x2))"),
+        parse_term("f(g(x3), x4,   x3,  x1)"),
     }
 
     print("EXAMPLE 1:")

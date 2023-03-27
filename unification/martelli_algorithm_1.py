@@ -8,6 +8,7 @@ This program implements Algorithm 1 as given by Martelli and Montanari in the
 from itertools import chain
 from terms import Term, Variable, Application
 from util import occurs, substitute
+from parse_term import parse_term
 
 
 class Equation:
@@ -89,22 +90,24 @@ def unify(equations: set[Equation]):
 
 def main():
     # g(x2) = x1
-    eq1 = Equation(Application("g", [Variable("x2")]), Variable("x1"))
-    eq2 = Equation(
-        # f(x1, h(x1), x2)
-        Application(
-            "f", [Variable("x1"), Application("h", [Variable("x1")]), Variable("x2")]
-        ),
-        # f(g(x3), x4, x3)
-        Application(
-            "f", [Application("g", [Variable("x3")]), Variable("x4"), Variable("x3")]
-        ),
+    eq1 = Equation(
+        parse_term("g(x2)"),
+        parse_term("x1"),
     )
+
+    # f(x1, h(x1), x2) = f(g(x3), x4, x3)
+    eq2 = Equation(
+        parse_term("f(x1, h(x1), x2)"),
+        parse_term("f(g(x3), x4, x3)"),
+    )
+
     equations = {eq1, eq2}
     mgu = unify(equations)
     print("Most general unifier:")
     for equation in sorted(mgu, key=lambda eq: eq.left.name):
         print(equation)
+
+    eq1 = Equation()
 
 
 if __name__ == "__main__":

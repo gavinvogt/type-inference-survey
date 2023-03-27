@@ -6,8 +6,9 @@ This program implements Algorithm 2 as given by Martelli and Montanari in the
 """
 
 from typing import Optional, TypeVar, Generic
-from terms import Term, Constant, Variable, Application
+from terms import Term, Variable, Application
 from util import apply_substitution, term_vars
+from parse_term import parse_term
 
 
 T = TypeVar("T", contravariant=True)
@@ -251,68 +252,16 @@ def unify(terms: Multiset[Term]):
 def main():
     terms = Multiset[Term](
         [
-            Application(
-                "f",
-                [
-                    Variable("x1"),
-                    Application(
-                        "g",
-                        [
-                            Constant("A"),
-                            Application("f", [Variable("x5"), Constant("B")]),
-                        ],
-                    ),
-                ],
-            ),
-            Application(
-                "f",
-                [
-                    Application("h", [Constant("C")]),
-                    Application(
-                        "g",
-                        [
-                            Variable("x2"),
-                            Application("f", [Constant("B"), Variable("x5")]),
-                        ],
-                    ),
-                ],
-            ),
-            Application(
-                "f",
-                [
-                    Application("h", [Variable("x4")]),
-                    Application("g", [Variable("x6"), Variable("x3")]),
-                ],
-            ),
+            parse_term("f(x1, g(A, f(x5, B)))"),
+            parse_term("f(h(C), g(x2, f(B, x5)))"),
+            parse_term("f(h(x4), g(x6, x3))"),
         ]
     )
 
     terms2 = Multiset[Term](
         [
-            Application(
-                "f",
-                [
-                    Variable("x1"),
-                    Application("g", [Variable("x2"), Variable("x3")]),
-                    Variable("x2"),
-                    Constant("B"),
-                ],
-            ),
-            Application(
-                "f",
-                [
-                    Application(
-                        "g",
-                        [
-                            Application("h", [Constant("A"), Variable("x5")]),
-                            Variable("x2"),
-                        ],
-                    ),
-                    Variable("x1"),
-                    Application("h", [Constant("A"), Variable("x4")]),
-                    Variable("x4"),
-                ],
-            ),
+            parse_term("f(x1, g(x2, x3), x2, B)"),
+            parse_term("f(g(h(A, x5), x2), x1, h(A, x4), x4)"),
         ]
     )
 
