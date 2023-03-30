@@ -107,8 +107,6 @@ def main():
     for equation in sorted(mgu, key=lambda eq: eq.left.name):
         print(equation)
 
-    eq1 = Equation()
-
 
 if __name__ == "__main__":
     main()
