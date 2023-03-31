@@ -7,7 +7,7 @@ This program implements Algorithm 2 as given by Martelli and Montanari in the
 
 from typing import Optional, TypeVar, Generic
 from terms import Term, Variable, Application
-from util import apply_substitution, term_vars
+from util import apply_substitution, term_vars, UnionFind
 from parse_term import parse_term
 
 
@@ -98,10 +98,11 @@ def common(M: Multiset[Term]) -> Term:
     # Every term is a function
     func_name = M.terms[0].name
     arity = M.terms[0].arity()
-    assert all((term.name == func_name and term.arity() == arity) for term in M.terms)
+    assert all(
+        (term.name == func_name and term.arity() == arity) for term in M.terms
+    ), "clash"
 
     common_args: list[Term] = []
-    f: list[Multiequation] = []
     for i in range(arity):
         leaves = Multiset[Term]([term.args[i] for term in M.terms])
         common_args.append(common(leaves))
@@ -121,7 +122,7 @@ def frontier(M: Multiset[Term]):
         arity = M.terms[0].arity()
         assert all(
             (term.name == func_name and term.arity() == arity) for term in M.terms
-        )
+        ), "clash"
 
         f: list[Multiequation] = []
         for i in range(arity):
@@ -143,7 +144,9 @@ def DEC(M: Multiset[Term]) -> tuple[Term, list[Multiequation]]:
     # All functions in M
     func_name = M.terms[0].name
     arity = M.terms[0].arity()
-    assert all((term.name == func_name and term.arity() == arity) for term in M.terms)
+    assert all(
+        (term.name == func_name and term.arity() == arity) for term in M.terms
+    ), "clash"
 
     common_args: list[Term] = []
     f: list[Multiequation] = []
@@ -156,23 +159,42 @@ def DEC(M: Multiset[Term]) -> tuple[Term, list[Multiequation]]:
 
 
 def compactify(multiequations: list[Multiequation]):
-    # NOTE: this is implemented naively for clarity
-    # It could be sped up using a Union Find to figure out which group
-    # to merge each multiequation with
-    compactified: list[Multiequation] = []
+    """
+    Compactifies the list of multiequations using a UNION-FIND to merge equations
+    that have variables that are part of the same group.
+
+    For example:
+        {x1, x2} = (A)
+        {x2, x3} = (B)
+        {x4}     = (C)
+    Will become:
+        {x1, x2, x3} = (A, B)
+        {x4}     = (C)
+    """
+    # Get all the variable names
+    var_names: set[str] = set()
     for meq in multiequations:
-        # Add `meq` into the compactified list of multiequations
-        found_merge = False
-        for compactified_meq in compactified:
-            if not meq.vars.isdisjoint(compactified_meq.vars):
-                # Merge the variables and terms of the two multiequations
-                compactified_meq.vars.update(meq.vars)
-                compactified_meq.terms.update(meq.terms)
-                found_merge = True
-                break
-        if not found_merge:
-            # Did not merge `meq` into another multiequation, so need to add it
-            compactified.append(meq)
+        var_names.update(var.name for var in meq.vars)
+
+    # Get the sets of variable names to group together
+    uf = UnionFind(var_names)
+    for meq in multiequations:
+        if len(meq.vars) >= 2:
+            uf.union_all(var.name for var in meq.vars)
+    var_sets = uf.get_sets()
+
+    # Set up the compactified multiequations
+    compactified: list[Multiequation] = []
+    var_to_meq: dict[str, Multiequation] = {}
+    for var_set in var_sets:
+        meq = Multiequation({Variable(var_name) for var_name in var_set}, Multiset())
+        compactified.append(meq)
+        for var_name in var_set:
+            var_to_meq[var_name] = meq
+
+    # Add each set of terms to the correct multiequation
+    for meq in multiequations:
+        var_to_meq[next(iter(meq.vars)).name].terms.update(meq.terms)
     return compactified
 
 
@@ -195,8 +217,7 @@ def solve_multiequations(system: list[Multiequation]):
         for selected_meq in U:
             # Step 1.1: Find a multiequation that has terms
             if len(selected_meq.terms) > 0:
-                found = True
-                # Step 1.2: compute the common part and frontier of the selected multiequation
+                # Step 1.2: Compute the common part and frontier of the selected multiequation's terms
                 common, frontier = DEC(selected_meq.terms)
 
                 # Step 1.3: Make sure the left-hand sides of the frontier don't contain
@@ -211,7 +232,7 @@ def solve_multiequations(system: list[Multiequation]):
                 U.extend(frontier)
                 U = compactify(U)
 
-                # Step 1.5: apply the substitution to all terms on the right-hand side
+                # Step 1.5: Apply the substitution to all terms on the right-hand side
                 # of every multiequation in U
                 substitution = {var.name: common for var in selected_meq.vars}
                 for meq in U:
@@ -220,13 +241,18 @@ def solve_multiequations(system: list[Multiequation]):
                     )
 
                 # Step 1.6: Move the selected multiequation from U to T
-                for i, meq in enumerate(U):
-                    if meq is selected_meq:
-                        U.pop(i)
+                for meq in U:
+                    if not selected_meq.vars.isdisjoint(meq.vars):
+                        # Re-located the selected multiequation object
+                        selected_meq = meq
                         break
+                U.remove(selected_meq)
                 T.append(selected_meq)
+
+                found = True
                 break
         if not found:
+            # All multiequations in U have an empty right-hand side
             break
 
     # Step 2: Transfer all left-over multiequations from U to T
@@ -250,18 +276,22 @@ def unify(terms: Multiset[Term]):
 
 
 def main():
+    # Expect:
+    # f(h(C), g(A, f(B, B)))
     terms = Multiset[Term](
         [
-            parse_term("f(x1, g(A, f(x5, B)))"),
-            parse_term("f(h(C), g(x2, f(B, x5)))"),
-            parse_term("f(h(x4), g(x6, x3))"),
+            parse_term("f( x1,   g(A,  f(x5, B)))"),
+            parse_term("f(h(C),  g(x2, f(B, x5)))"),
+            parse_term("f(h(x4), g(x6,    x3))"),
         ]
     )
 
+    # Expect:
+    # f(g(h(A, B), h(A, B)), g(h(A, B), h(A, B)), h(A, B), B)
     terms2 = Multiset[Term](
         [
-            parse_term("f(x1, g(x2, x3), x2, B)"),
-            parse_term("f(g(h(A, x5), x2), x1, h(A, x4), x4)"),
+            parse_term("f(      x1,        g(x2, x3),     x2,     B)"),
+            parse_term("f(g(h(A, x5), x2),     x1,     h(A, x4),  x4)"),
         ]
     )
 
