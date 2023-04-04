@@ -1,0 +1,208 @@
+[
+    {
+        "type": "FuncDecl",
+        "name": "f",
+        "params": [
+            "x"
+        ],
+        "body": {
+            "type": "If",
+            "condition": {
+                "type": "and",
+                "left": {
+                    "type": "==",
+                    "left": "x",
+                    "right": 4
+                },
+                "right": {
+                    "type": "==",
+                    "left": 3,
+                    "right": 7
+                }
+            },
+            "then": {
+                "type": "+",
+                "left": "x",
+                "right": 1
+            },
+            "else": 6
+        }
+    },
+    {
+        "type": "FuncDecl",
+        "name": "fact",
+        "params": [
+            "x"
+        ],
+        "body": {
+            "type": "If",
+            "condition": {
+                "type": "==",
+                "left": "x",
+                "right": 0
+            },
+            "then": 1,
+            "else": {
+                "type": "+",
+                "left": "x",
+                "right": {
+                    "type": "FuncCall",
+                    "expr": "fact",
+                    "args": [
+                        {
+                            "type": "+",
+                            "left": "x",
+                            "right": 1
+                        }
+                    ]
+                }
+            }
+        }
+    },
+    {
+        "type": "FuncDecl",
+        "name": "f",
+        "params": [
+            "x"
+        ],
+        "body": "x"
+    },
+    {
+        "type": "FuncDecl",
+        "name": "increment",
+        "params": [
+            "x"
+        ],
+        "body": {
+            "type": "+",
+            "left": "x",
+            "right": 1
+        }
+    },
+    {
+        "type": "FuncDecl",
+        "name": "higher_order_function",
+        "params": [
+            "func",
+            "x"
+        ],
+        "body": {
+            "type": "If",
+            "condition": {
+                "type": "FuncCall",
+                "expr": "func",
+                "args": [
+                    0
+                ]
+            },
+            "then": {
+                "type": "+",
+                "left": "x",
+                "right": 3
+            },
+            "else": 4
+        }
+    },
+    {
+        "type": "FuncDecl",
+        "name": "map",
+        "params": [
+            "f",
+            "m"
+        ],
+        "body": {
+            "type": "If",
+            "condition": {
+                "type": "FuncCall",
+                "expr": "null",
+                "args": [
+                    "m"
+                ]
+            },
+            "then": {
+                "type": "FuncCall",
+                "expr": "nil",
+                "args": []
+            },
+            "else": {
+                "type": "FuncCall",
+                "expr": "cons",
+                "args": [
+                    {
+                        "type": "FuncCall",
+                        "expr": "f",
+                        "args": [
+                            {
+                                "type": "FuncCall",
+                                "expr": "hd",
+                                "args": [
+                                    "m"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "type": "FuncCall",
+                        "expr": "map",
+                        "args": [
+                            "f",
+                            {
+                                "type": "FuncCall",
+                                "expr": "tl",
+                                "args": [
+                                    "m"
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "type": "FuncDecl",
+        "name": "testIfRedex",
+        "params": [
+            "condExpr",
+            "f1",
+            "f2",
+            "argExpr"
+        ],
+        "body": {
+            "type": "FuncCall",
+            "expr": {
+                "type": "If",
+                "condition": "condExpr",
+                "then": "f1",
+                "else": "f2"
+            },
+            "args": [
+                "argExpr"
+            ]
+        }
+    },
+    {
+        "type": "FuncDecl",
+        "name": "testLet",
+        "params": [
+            "y",
+            "f"
+        ],
+        "body": {
+            "type": "Let",
+            "var": "x",
+            "val": {
+                "type": "+",
+                "left": "y",
+                "right": 1
+            },
+            "expr": {
+                "type": "FuncCall",
+                "expr": "f",
+                "args": [
+                    "x"
+                ]
+            }
+        }
+    }
+]
