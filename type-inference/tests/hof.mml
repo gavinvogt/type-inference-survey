@@ -1,0 +1,5 @@
+fun f func x = if func 0 then x + 3 else 4;
+
+fun testIfRedex condExpr f1 f2 argExpr = (if condExpr then f1 else f2) argExpr;
+
+fun testLet y f = let x = y + 1 in f x;

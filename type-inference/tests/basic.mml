@@ -1,0 +1,19 @@
+fun succ x = x + 1;
+
+fun pred x = x - 1;
+
+fun divide a b = a / b;
+
+fun identity x = x;
+
+fun allTrue a b c = a and b and c;
+
+fun anyTrue a b c = a or b or c;
+
+fun isZero val = val == 0;
+
+fun isPositive val = val > 0;
+
+fun isNegative val = val < 0;
+
+fun test = nil;

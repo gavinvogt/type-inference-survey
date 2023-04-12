@@ -4,9 +4,12 @@ Author: Gavin Vogt
 Defines the Type contructs
 """
 
+from typing import Optional
+
 
 class Type:
-    pass
+    def __repr__(self):
+        return f"{self.__class__.__name__}({str(self)})"
 
 
 class TypeVariable(Type):
@@ -26,32 +29,41 @@ class TypeVariable(Type):
 
 
 class TypeApplication(Type):
-    """Represents a function type such as (a -> b)"""
+    """Represents a function type such as (a -> b -> c)"""
 
-    def __init__(self, args: list[Type], ret: Type | None):
-        self._args = args
+    def __init__(self, arg: Type, ret: Optional[Type]):
+        self._arg = arg
         if ret is None:
-            self._ret = TypeConstant("void")
+            self._ret = TypeConstant("unit")
         else:
             self._ret = ret
 
     def __str__(self):
-        if len(self._args) == 1 and not isinstance(self._args[0], TypeApplication):
-            return f"{self._args[0]} -> {self._ret}"
+        if isinstance(self._arg, TypeApplication):
+            # Add parenthesis to distinguish
+            return f"({self._arg}) -> {self._ret}"
         else:
-            arg_list = ", ".join(str(arg) for arg in self._args)
-            return f"({arg_list}) -> {self._ret}"
+            # No parenthesis needed
+            return f"{self._arg} -> {self._ret}"
+
+        # TODO: delete this
+        # if len(self._args) == 1 and not isinstance(self._args[0], TypeApplication):
+        #     return f"{self._args[0]} -> {self._ret}"
+        # else:
+        #     arg_list = ", ".join(str(arg) for arg in self._args)
+        #     return f"({arg_list}) -> {self._ret}"
 
     @property
-    def args(self):
-        return self._args
+    def arg(self):
+        return self._arg
 
     def __eq__(self, other: object):
         """Checks if two types are equivalent"""
         if isinstance(other, TypeApplication):
             return (
-                len(self.args) == len(other.args)
-                and all(x == y for x, y in zip(self.args, other.args))
+                # TODO: get rid of length check
+                # len(self.args) == len(other.args)
+                self._arg == other._arg
                 and self._ret == other._ret
             )
         else:

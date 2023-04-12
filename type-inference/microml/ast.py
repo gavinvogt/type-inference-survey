@@ -4,7 +4,7 @@ File: ast.py
 This program defines the classes for an AST
 """
 
-from typing import Iterable
+from typing import Any, Optional
 from constructs import Type
 
 
@@ -23,22 +23,12 @@ class TypeSymbol:
         self._type = new_type
 
 
-# class Id:
-#     def __init__(self, id: str):
-#         self._id = id
-
-#     def __str__(self):
-#         return f"Id('{self._id}')"
-
-
 class AST:
     """Represents an abstract syntax tree"""
 
     def __init__(self):
-        self.type: Type | None = None
-
-    def gen_type_equations(self) -> Iterable[tuple[Type, Type]]:
-        raise NotImplementedError
+        # TODO: do I need this??
+        self.type: Optional[Type] = None
 
 
 class Expression(AST):
@@ -49,16 +39,24 @@ class Expression(AST):
 
 class FunctionDefinition(AST):
     def __init__(self, func_name: str, params: list[str], body: Expression):
+        # NOTE: parameters are in curried form
+        # f x y z = FunctionDefinition("f", ["x", "y", "z"], ...)
         self.func_name = func_name
         self.params = params
         self.body = body
 
+    def __repr__(self):
+        return " -> ".join(self.params) + f" -> {self.body}"
+
 
 class FunctionCall(Expression):
-    def __init__(self, func_expr: Expression, args: list[Expression]):
+    def __init__(self, func_expr: Expression, arg: Expression):
         super().__init__()
         self.func_expr = func_expr
-        self.args = args
+        self.arg = arg
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}({self.func_expr}, {self.arg})"
 
 
 class IfExpr(Expression):
@@ -70,6 +68,11 @@ class IfExpr(Expression):
         self.then_expr = then_expr
         self.else_expr = else_expr
 
+    def __repr__(self):
+        return (
+            f"( if ({self.condition}) then ({self.then_expr}) else ({self.else_expr}) )"
+        )
+
 
 class LetExpr(Expression):
     def __init__(self, var: str, val: Expression, expr: Expression):
@@ -79,13 +82,47 @@ class LetExpr(Expression):
         self.val = val
         self.expr = expr
 
+    def __repr__(self):
+        return f"( let {self.var} = ({self.val}) in ({self.expr}) )"
 
-class BinaryOp(Expression):
+
+class FnExpr(Expression):
+    def __init__(self, params: list[str], body: Expression):
+        # fn params => body
+        super().__init__()
+        self.params = params
+        self.body = body
+
+    def __repr__(self):
+        return f"( fn ({' '.join(self.params)}) => ({self.body}) )"
+
+
+class BinaryExpr(Expression):
     def __init__(self, op: str, left: Expression, right: Expression):
         super().__init__()
         self.op = op
         self.left_expr = left
         self.right_expr = right
+
+    def __repr__(self):
+        return f"( {self.left_expr} {self.op} {self.right_expr} )"
+
+
+class UnaryExpr(Expression):
+    def __init__(self, op: str, expr: Expression):
+        super().__init__()
+        self.op = op
+        self.expr = expr
+
+    def __repr__(self):
+        return f"( {self.op} {self.expr} )"
+
+
+class UnitExpr(Expression):
+    """Represents the "unit", or ()"""
+
+    def __init__(self):
+        super().__init__()
 
 
 class IdExpr(Expression):
@@ -95,26 +132,35 @@ class IdExpr(Expression):
         # Note: does not call super because its type comes from looking up the identifier in the scope
         self.id = id
 
+    def __repr__(self):
+        return f"{self.__class__.__name__}({self.id})"
 
-class IntLiteral(Expression):
+
+class Literal(Expression):
+    def __init__(self, val: Any):
+        super().__init__()
+        self._val = val
+
+    def __repr__(self):
+        return str(self._val)
+
+
+class IntLiteral(Literal):
     """Integer literal"""
 
     def __init__(self, val: int):
-        super().__init__()
-        self._val = val
+        super().__init__(val)
 
 
-class FloatLiteral(Expression):
-    """Float literal"""
+class RealLiteral(Literal):
+    """Real literal"""
 
     def __init__(self, val: float):
-        super().__init__()
-        self._val = val
+        super().__init__(val)
 
 
-class BoolLiteral(Expression):
+class BoolLiteral(Literal):
     """Boolean literal"""
 
     def __init__(self, val: bool):
-        super().__init__()
-        self._val = val
+        super().__init__(val)

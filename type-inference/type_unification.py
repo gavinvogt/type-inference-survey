@@ -14,7 +14,7 @@ def occurs(var: TypeVariable, term: Type) -> bool:
     elif isinstance(term, TypeVariable):
         return False
     elif isinstance(term, TypeApplication):
-        return any(occurs(var, arg) for arg in term.args)
+        return occurs(var, term.arg) or occurs(var, term._ret)
     elif isinstance(term, TypeList):
         return occurs(var, term.el_type)
     else:
@@ -25,7 +25,7 @@ def apply_substitution(term: Type, x: TypeVariable, t: Type) -> Type:
     """Applies a substitution of x -> t to the given term"""
     if isinstance(term, TypeApplication):
         return TypeApplication(
-            [apply_substitution(arg, x, t) for arg in term.args],
+            apply_substitution(term.arg, x, t),
             apply_substitution(term._ret, x, t),
         )
     elif isinstance(term, TypeList):
@@ -48,16 +48,13 @@ def unify(equations: list[tuple[Type, Type]]):
             # (already know that t1 != t2 from above `if` statement)
             raise Exception(f"Incompatible types {t1} and {t2}")
         elif isinstance(t1, TypeApplication) and isinstance(t2, TypeApplication):
-            if len(t1.args) == len(t2.args):
-                # Decompose two function types
-                decomposed_type_eqs: list[tuple[Type, Type]] = []
-                for arg1, arg2 in zip(t1.args, t2.args):
-                    decomposed_type_eqs.append((arg1, arg2))
-                decomposed_type_eqs.append((t1._ret, t2._ret))
-                equations = [*decomposed_type_eqs, *equations]
-            else:
-                # Conflict (type unification fails)
-                raise Exception("Conflict: argument count mismatch")
+            # TODO: would check for conflict in length if tuple types
+            # but just have currying of arguments
+            equations = [
+                (t1.arg, t2.arg),  # Unify arguments
+                (t1._ret, t2._ret),  # Unify return values
+                *equations,  # Unify the other remaining equations
+            ]
         elif isinstance(t1, TypeList) and isinstance(t2, TypeList):
             # Decompose two list types
             equations.insert(0, (t1.el_type, t2.el_type))
