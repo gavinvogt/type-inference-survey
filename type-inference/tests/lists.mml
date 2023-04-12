@@ -1,0 +1,29 @@
+fun length list = if null list then 0 else 1 + length(tl list);
+
+fun bubbleSort l comp = if null l then nil
+    else let
+        bubble = fn l n => if null l then nil
+            else if null(tl l) then cons (hd l) nil
+            else if n == 0 then l
+            else let x1 = hd l
+                in let x2 = hd(tl l)
+                in let tail = tl(tl l)
+                in if comp x1 x2
+                    then cons x1 (bubble (cons x2 tail) (n - 1))
+                    else cons x2 (bubble (cons x1 tail) (n - 1))
+    in let
+        bubbleAll = fn l n => if n == 0 then l
+            else bubbleAll (bubble l n) (n - 1)
+    in bubbleAll l (length l - 1);
+
+
+fun isPrefix list1 list2 = if null list1 then true
+    else if null list2 then false
+    else hd list1 == hd list2 and isPrefix (tl list1) (tl list2);
+
+fun map f list = if null list then nil
+    else cons (f (hd list)) (map f (tl list));
+
+fun multiplyAll list factor = map (fn x => x * factor) list;
+
+fun divideAll list divisor = map (fn x => x / divisor) list;

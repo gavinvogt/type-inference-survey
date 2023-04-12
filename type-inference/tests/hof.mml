@@ -1,4 +1,6 @@
-fun f func x = if func 0 then x + 3 else 4;
+fun f1 func x = if func 0 then x + 3 else 4;
+
+fun f2 func x = if func(0) then x + 3 else 4;
 
 fun testIfRedex condExpr f1 f2 argExpr = (if condExpr then f1 else f2) argExpr;
 
