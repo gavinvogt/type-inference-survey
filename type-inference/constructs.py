@@ -32,36 +32,19 @@ class TypeApplication(Type):
     """Represents a function type such as (a -> b -> c)"""
 
     def __init__(self, arg: Type, ret: Optional[Type]):
-        self._arg = arg
+        self.arg = arg
         if ret is None:
-            self._ret = TypeConstant("unit")
+            self.ret = TypeConstant("unit")
         else:
-            self._ret = ret
+            self.ret = ret
 
     def __str__(self):
-        if isinstance(self._arg, TypeApplication):
-            # Add parenthesis to distinguish
+        if isinstance(self.arg, TypeApplication):
+            # Add parenthesis to clarify associativity
             return f"({self.arg}) -> {self.ret}"
         else:
             # No parenthesis needed
             return f"{self.arg} -> {self.ret}"
-
-        # TODO: delete this
-        # if len(self._args) == 1 and not isinstance(self._args[0], TypeApplication):
-        #     return f"{self._args[0]} -> {self._ret}"
-        # else:
-        #     arg_list = ", ".join(str(arg) for arg in self._args)
-        #     return f"({arg_list}) -> {self._ret}"
-
-    @property
-    def arg(self):
-        """Gets the argument type"""
-        return self._arg
-
-    @property
-    def ret(self):
-        """Gets the return type"""
-        return self._ret
 
     def __eq__(self, other: object):
         """Checks if two types are equivalent"""
