@@ -209,7 +209,7 @@ class Parser:
                 "(",
             }:
                 arg = self._expr6(parse_call=False)
-                expr = FunctionCall(expr, arg)
+                expr = CallExpr(expr, arg)
 
         return expr
 

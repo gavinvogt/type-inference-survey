@@ -20,6 +20,15 @@ class Scope:
         self._parent = parent
         self._symbols: dict[str, TypeSymbol] = {}
 
+    def __str__(self):
+        symbols = "\n".join(
+            f"{name}: {symbol}" for name, symbol in self.symbols.items()
+        )
+        if self._parent is None:
+            return symbols
+        else:
+            return str(self._parent) + "\n----------\n" + symbols
+
     @property
     def symbols(self):
         """Readonly symbols dict"""

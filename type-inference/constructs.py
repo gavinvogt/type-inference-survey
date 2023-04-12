@@ -5,11 +5,37 @@ Defines the Type contructs
 """
 
 from typing import Optional
+from abc import ABC, abstractmethod
 
 
-class Type:
+class PolymorphicTypeVar:
+    LETTERS = "abcdefghijklmnopqrstuvwxyz"
+
+    def __init__(self):
+        self._n = 0
+        self._types: dict[str, str] = {}
+
+    def get_type(self, var_name: str):
+        if var_name not in self._types:
+            letter = self.LETTERS[self._n]
+            self._types[var_name] = f"'{letter}"
+            self._n += 1  # advance the letter
+        return self._types[var_name]
+
+
+class Type(ABC):
     def __repr__(self):
         return f"{self.__class__.__name__}({str(self)})"
+
+    @abstractmethod
+    def type_str(self, ptv: Optional[PolymorphicTypeVar] = None) -> str:
+        """
+        Gets the full type string using 'a, 'b, ... for polymorphic type variables.
+
+        Example:
+        map : ('a -> 'b) -> 'a[] -> 'b[]
+        """
+        return NotImplemented
 
 
 class TypeVariable(Type):
@@ -26,6 +52,11 @@ class TypeVariable(Type):
             return self.name == other.name
         else:
             return False
+
+    def type_str(self, ptv: Optional[PolymorphicTypeVar] = None):
+        if ptv is None:
+            ptv = PolymorphicTypeVar()
+        return ptv.get_type(self.name)
 
 
 class TypeApplication(Type):
@@ -58,6 +89,19 @@ class TypeApplication(Type):
         else:
             return False
 
+    def type_str(self, ptv: Optional[PolymorphicTypeVar] = None):
+        if ptv is None:
+            ptv = PolymorphicTypeVar()
+
+        arg = self.arg.type_str(ptv)
+        ret = self.ret.type_str(ptv)
+        if isinstance(self.arg, TypeApplication):
+            # Add parenthesis to clarify associativity
+            return f"({arg}) -> {ret}"
+        else:
+            # No parenthesis needed
+            return f"{arg} -> {ret}"
+
 
 class TypeConstant(Type):
     """Represents a constant type (bool, int, float). Could be extended to
@@ -75,6 +119,9 @@ class TypeConstant(Type):
         else:
             return False
 
+    def type_str(self, ptv: Optional[PolymorphicTypeVar] = None):
+        return self.name
+
 
 class TypeList(Type):
     """Represents a list that contains some other type (type var, constant, or other list)"""
@@ -83,10 +130,27 @@ class TypeList(Type):
         self.el_type = el_type
 
     def __str__(self):
-        return f"{self.el_type}[]"
+        if isinstance(self.el_type, TypeApplication):
+            # Add parenthesis to clarify associativity
+            return f"({self.el_type})[]"
+        else:
+            # No parenthesis needed
+            return f"{self.el_type}[]"
 
     def __eq__(self, other: object):
         if isinstance(other, TypeList):
             return self.el_type == other.el_type
         else:
             return False
+
+    def type_str(self, ptv: Optional[PolymorphicTypeVar] = None):
+        if ptv is None:
+            ptv = PolymorphicTypeVar()
+
+        el_type = self.el_type.type_str(ptv)
+        if isinstance(self.el_type, TypeApplication):
+            # Add parenthesis to clarify associativity
+            return f"(el)[]"
+        else:
+            # No parenthesis needed
+            return f"{el_type}[]"

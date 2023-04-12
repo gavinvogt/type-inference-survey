@@ -22,6 +22,9 @@ class TypeSymbol:
     def type(self, new_type: Type):
         self._type = new_type
 
+    def __repr__(self):
+        return f"{self.__class__.__name__}({self._type})"
+
 
 class AST:
     """Represents an abstract syntax tree"""
@@ -49,7 +52,7 @@ class FunctionDefinition(AST):
         return " -> ".join(self.params) + f" -> {self.body}"
 
 
-class FunctionCall(Expression):
+class CallExpr(Expression):
     def __init__(self, func_expr: Expression, arg: Expression):
         super().__init__()
         self.func_expr = func_expr
