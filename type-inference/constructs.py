@@ -41,10 +41,10 @@ class TypeApplication(Type):
     def __str__(self):
         if isinstance(self._arg, TypeApplication):
             # Add parenthesis to distinguish
-            return f"({self._arg}) -> {self._ret}"
+            return f"({self.arg}) -> {self.ret}"
         else:
             # No parenthesis needed
-            return f"{self._arg} -> {self._ret}"
+            return f"{self.arg} -> {self.ret}"
 
         # TODO: delete this
         # if len(self._args) == 1 and not isinstance(self._args[0], TypeApplication):
@@ -55,7 +55,13 @@ class TypeApplication(Type):
 
     @property
     def arg(self):
+        """Gets the argument type"""
         return self._arg
+
+    @property
+    def ret(self):
+        """Gets the return type"""
+        return self._ret
 
     def __eq__(self, other: object):
         """Checks if two types are equivalent"""
@@ -63,8 +69,8 @@ class TypeApplication(Type):
             return (
                 # TODO: get rid of length check
                 # len(self.args) == len(other.args)
-                self._arg == other._arg
-                and self._ret == other._ret
+                self.arg == other.arg
+                and self.ret == other.ret
             )
         else:
             return False

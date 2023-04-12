@@ -14,7 +14,7 @@ def occurs(var: TypeVariable, term: Type) -> bool:
     elif isinstance(term, TypeVariable):
         return False
     elif isinstance(term, TypeApplication):
-        return occurs(var, term.arg) or occurs(var, term._ret)
+        return occurs(var, term.arg) or occurs(var, term.ret)
     elif isinstance(term, TypeList):
         return occurs(var, term.el_type)
     else:
@@ -26,7 +26,7 @@ def apply_substitution(term: Type, x: TypeVariable, t: Type) -> Type:
     if isinstance(term, TypeApplication):
         return TypeApplication(
             apply_substitution(term.arg, x, t),
-            apply_substitution(term._ret, x, t),
+            apply_substitution(term.ret, x, t),
         )
     elif isinstance(term, TypeList):
         return TypeList(apply_substitution(term.el_type, x, t))
@@ -52,7 +52,7 @@ def unify(equations: list[tuple[Type, Type]]):
             # but just have currying of arguments
             equations = [
                 (t1.arg, t2.arg),  # Unify arguments
-                (t1._ret, t2._ret),  # Unify return values
+                (t1.ret, t2.ret),  # Unify return values
                 *equations,  # Unify the other remaining equations
             ]
         elif isinstance(t1, TypeList) and isinstance(t2, TypeList):
@@ -94,7 +94,7 @@ def main():
     """
     # Note: anonymous function that takes takes function `isZero` as an argument
 
-    unify([(TypeVariable("X"), TypeList(TypeConstant("Int")))])
+    unify([(TypeVariable("X"), TypeList(TypeConstant("int")))])
 
     # Constraint set:
     """
@@ -113,7 +113,7 @@ def main():
         [
             (
                 TypeVariable("t1"),
-                TypeApplication([TypeVariable("t5")], TypeVariable("t4")),
+                TypeApplication(TypeVariable("t5"), TypeVariable("t4")),
             ),
             (TypeVariable("t5"), TypeConstant("int")),
             (TypeVariable("t4"), TypeConstant("bool")),
@@ -123,7 +123,7 @@ def main():
             (TypeVariable("t7"), TypeVariable("t3")),
             (
                 TypeVariable("t2"),
-                TypeApplication([TypeVariable("t1")], TypeVariable("t3")),
+                TypeApplication(TypeVariable("t1"), TypeVariable("t3")),
             ),
         ]
     )
@@ -138,11 +138,7 @@ def main():
 
     print("----")
     """
-    FunctionDefinition(
-        Id("f"),   # name
-        Id("x"),   # argument
-        Id("x"),   # Just returns x
-    )
+    f x = x;
 
     t1 = t2 -> t2
     """
@@ -151,7 +147,7 @@ def main():
         [
             (
                 TypeVariable("t1"),
-                TypeApplication([TypeVariable("t2")], TypeVariable("t2")),
+                TypeApplication(TypeVariable("t2"), TypeVariable("t2")),
             )
         ]
     )
