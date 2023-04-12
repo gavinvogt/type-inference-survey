@@ -5,9 +5,12 @@ This program performs type inference on an AST. Assumes that ID binding has
 already taken place.
 """
 
-from typing import Optional, Union
+from typing import Optional
+
 from microml.parser import Parser
 from type_unification import unify
+from constructs import Type, TypeApplication, TypeVariable, TypeConstant, TypeList
+from scope import Scope
 from microml.ast import (
     AST,
     FunctionDefinition,
@@ -20,41 +23,13 @@ from microml.ast import (
     IntLiteral,
     RealLiteral,
     BoolLiteral,
-    TypeSymbol,
     Expression,
 )
-from constructs import Type, TypeApplication, TypeVariable, TypeConstant, TypeList
 
 INT_TYPE = "int"
 REAL_TYPE = "real"
 BOOL_TYPE = "bool"
 UNIT_TYPE = "unit"
-
-
-class Scope:
-    def __init__(self, parent: Union["Scope", None] = None):
-        self._parent = parent
-        self._symbols: dict[str, TypeSymbol] = {}
-
-    @property
-    def symbols(self):
-        """Readonly symbols dict"""
-        return self._symbols
-
-    def create(self, id: str):
-        """Creates the given ID in the symbol table and gives it a type symbol"""
-        if id in self._symbols:
-            raise Exception(f"Identifier {id} already exists in scope")
-        self._symbols[id] = TypeSymbol()
-
-    def lookup(self, id: str) -> TypeSymbol:
-        """Searches for the given ID in the scope"""
-        if id in self._symbols:
-            return self._symbols[id]
-        elif self._parent is not None:
-            return self._parent.lookup(id)
-        else:
-            raise Exception(f"{id} not found")
 
 
 class TypeVarGenerator:
