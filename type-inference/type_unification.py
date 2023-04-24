@@ -79,7 +79,6 @@ def unify(equations: list[tuple[Type, Type]]):
                     substitutions[name] = apply_substitution(
                         substitutions[name], t1, t2
                     )
-
                 substitutions[t1.name] = t2
         else:
             raise Exception(f"Failed to unify term {t1} = {t2}")

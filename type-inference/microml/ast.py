@@ -4,7 +4,7 @@ File: ast.py
 This program defines the classes for an AST
 """
 
-from typing import Any, Optional
+from typing import Any
 from constructs import Type
 
 
@@ -30,26 +30,30 @@ class AST:
     """Represents an abstract syntax tree"""
 
     def __init__(self):
-        # TODO: do I need this??
-        self.type: Optional[Type] = None
+        self.symbol = TypeSymbol()
 
 
 class Expression(AST):
     def __init__(self):
         """Initialized every expression with a symbol to track its type"""
-        self.symbol = TypeSymbol()
+        super().__init__()
 
 
 class FunctionDefinition(AST):
     def __init__(self, func_name: str, params: list[str], body: Expression):
         # NOTE: parameters are in curried form
         # f x y z = FunctionDefinition("f", ["x", "y", "z"], ...)
+        super().__init__()
         self.func_name = func_name
         self.params = params
         self.body = body
 
     def __repr__(self):
-        return " -> ".join(self.params) + f" -> {self.body}"
+        if len(self.params) > 0:
+            params = " -> ".join(self.params)
+        else:
+            params = "()"
+        return f"{params} -> {self.body}"
 
 
 class CallExpr(Expression):
@@ -132,7 +136,7 @@ class IdExpr(Expression):
     """Special expression since its type comes from the symbol table"""
 
     def __init__(self, id: str):
-        # Note: does not call super because its type comes from looking up the identifier in the scope
+        super().__init__()
         self.id = id
 
     def __repr__(self):

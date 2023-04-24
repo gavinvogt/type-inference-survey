@@ -5,7 +5,21 @@ This program defines the parser for Micro-ML
 """
 
 from .scanner import Scanner
-from .ast import *
+from .ast import (
+    FunctionDefinition,
+    CallExpr,
+    IfExpr,
+    LetExpr,
+    FnExpr,
+    BinaryExpr,
+    UnaryExpr,
+    IdExpr,
+    UnitExpr,
+    IntLiteral,
+    RealLiteral,
+    BoolLiteral,
+    Expression,
+)
 
 
 class Parser:
@@ -43,33 +57,6 @@ class Parser:
             tok = self._scanner.match("ID")
             parameters.append(tok.value)
         return parameters
-
-    # def _expr(self) -> Expression:
-    #     tok = self._scanner.peek()
-    #     match tok.kind:
-    #         case "if":
-    #             return self._if_expr()
-    #         case "let":
-    #             return self._let_expr()
-    #         case "fn":
-    #             return self._fn_expr()
-    #         case _:
-    #             expr = self._expr0()
-    #             # In case it is a function call
-    #             # f a b c = FunctionCall(FunctionCall(FunctionCall("f", "a"), "b"), "c")
-    #             args: list[Expression] = []
-    #             while self._scanner.peek().kind in {
-    #                 "INT",
-    #                 "REAL",
-    #                 "true",
-    #                 "false",
-    #                 "ID",
-    #                 "(",
-    #             }:
-    #                 args.append(self._expr0())
-    #             for arg in args:
-    #                 expr = FunctionCall(expr, arg)
-    #             return expr
 
     def _expr(self) -> Expression:
         tok = self._scanner.peek()

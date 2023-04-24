@@ -17,3 +17,8 @@ fun isPositive val = val > 0;
 fun isNegative val = val < 0;
 
 fun test = nil;
+
+fun basicLet = let x = 3 in x;
+
+# This should fail
+# fun y = let x = x in x;

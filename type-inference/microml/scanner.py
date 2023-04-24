@@ -60,6 +60,7 @@ TOKEN_SPECIFICATION: Final = (
     ("PUNC", f"({'|'.join(re.escape(punc) for punc in PUNCTUATION)})"),
     ("ID", r"[a-zA-Z]\w*"),  # Identifiers
     ("END", r";"),  # End of a statement
+    ("COMMENT", r"#.*\n"),  # Comment
     ("NEWLINE", r"\n"),  # Newline (for tracking line number)
     ("SKIP", r"[ \t]+"),  # Skip over whitespace
     ("MISMATCH", r"."),  # Anything else does not match
@@ -81,7 +82,7 @@ class Scanner:
         for mo in re.finditer(TOK_REGEX, code):
             kind: str = mo.lastgroup  # type: ignore
             value: str = mo.group()
-            if kind == "NEWLINE":
+            if kind in ("COMMENT", "NEWLINE"):
                 line_num += 1
                 column = 1
             else:
@@ -115,15 +116,15 @@ class Scanner:
 
 
 def main():
-
     s = Scanner()
     s.scan(
         """
+    # Comment
     fun f x y = if x then y else 5;
     
     fun g z = let x = z * 2 in x + 4;
 
-    fun isZero val = if val == 0 then true else false;
+    fun isZero val = if val == 0 then true else false;  # In-line comment
 
     fun f x = (fn y => y + 1) x;
     """
