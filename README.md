@@ -33,7 +33,7 @@ This folder contains various implementations of unification from the papers by R
 
 &mu;ML is a basic subset of ML. It contains *if* and *let* expressions, anonymous *fn* functions, and operators such as `+` and `<`. It is used as a toy functional language for performing type inference.
 
-## Syntax
+## EBNF Syntax
 
 ```
 <program>    ::=  { <func_def> }

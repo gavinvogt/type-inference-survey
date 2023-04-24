@@ -1,0 +1,22 @@
+<program>    ::=  { <func_def> }
+<func_def>   ::=  "fun" <ID> <params> "=" <expr>;
+<params>     ::=  { <ID> }
+<expr>       ::=  <if_expr> | <let_expr> | <fn_expr> | <expr0>
+<if_expr>    ::=  "if" <expr> "then" <expr> "else" <expr>
+<let_expr>   ::=  "let" <ID> "=" <expr> "in" <expr>
+<fn_expr>    ::=  "fn" <params> "=>" <expr>
+<expr0>      ::=  <expr1> { "or" <expr1> }
+<expr1>      ::=  <expr2> { "and" <expr2> }
+<expr2>      ::=  <expr3> [ ( "==" | "!=" | "<" | ">" | "<=" | ">=" ) <expr3> ]
+<expr3>      ::=  <expr4> [ ( "+" | "-" ) <expr4> ]
+<expr4>      ::=  <expr5> [ ( "*" | "/" ) <expr5> ]
+<expr5>      ::=  { "-" | "not" } <expr6>
+<expr6>      ::=  <int> | <real> | <bool> | <ID> | "(" [ <expr> ] ")" | <func_call>
+<func_call>  ::=  <expr6> { <expr6> }
+
+<bool>       ::=  "true" | "false"
+
+# Defined with regex for ease
+<int>        ::=  \d+
+<real>       ::=  \d+\.\d+
+<ID>         ::=  [a-zA-Z]\w*
