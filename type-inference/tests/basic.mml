@@ -1,24 +1,38 @@
+# int -> int
 fun succ x = x + 1;
 
+# int -> int
 fun pred x = x - 1;
 
+# real -> real
 fun divide a b = a / b;
 
+# 'a -> 'a
 fun identity x = x;
 
+# bool -> bool -> bool -> bool
 fun allTrue a b c = a and b and c;
 
+# bool -> bool -> bool -> bool
 fun anyTrue a b c = a or b or c;
 
+# int -> bool
 fun isZero val = val == 0;
 
+# int -> bool
 fun isPositive val = val > 0;
 
+# int -> bool
 fun isNegative val = val < 0;
 
+# () -> 'a[]
 fun test = nil;
 
+# () -> int
 fun basicLet = let x = 3 in x;
+
+# real -> real
+fun half x = x / 2.0;
 
 # This should fail
 # fun y = let x = x in x;

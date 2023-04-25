@@ -1,12 +1,16 @@
+# ('a -> 'b) -> 'a[] -> 'b[]
 fun map f list = if null list then nil
     else cons (f (hd list)) (map f (tl list));
 
+# 'a[] -> 'a[] -> bool
 fun isPrefix list1 list2 = if null list1 then true
     else if null list2 then false
     else hd list1 == hd list2 and isPrefix (tl list1) (tl list2);
 
+# int[] -> int -> int[]
 fun multiplyAll list factor = map (fn x => x * factor) list;
 
+# real[] -> real -> real[]
 fun divideAll list divisor = map (fn x => x / divisor) list;
 
 # TODO: this should not fail

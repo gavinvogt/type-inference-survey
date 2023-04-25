@@ -1,5 +1,7 @@
+# 'a[] -> int
 fun length list = if null list then 0 else 1 + length(tl list);
 
+# 'a[] -> ('a -> 'a -> bool) -> 'a[]
 fun bubbleSort l comp = if null l then nil
     else let
         bubble = fn l n => if null l then nil
