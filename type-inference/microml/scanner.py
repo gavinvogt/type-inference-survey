@@ -55,7 +55,7 @@ class Token(NamedTuple):
 
 
 TOKEN_SPECIFICATION: Final = (
-    ("REAL", r"\d+.\d+"),  # Real (float) number
+    ("REAL", r"\d+\.\d+"),  # Real (float) number
     ("INT", r"\d+"),  # Integer number
     ("PUNC", f"({'|'.join(re.escape(punc) for punc in PUNCTUATION)})"),
     ("ID", r"[a-zA-Z]\w*"),  # Identifiers
@@ -112,7 +112,7 @@ class Scanner:
         if tok.kind == kind:
             return self.consume()
         else:
-            raise Exception(f"Invalid token at {tok.coord}")
+            raise Exception(f"Invalid token '{tok.value}' at {tok.coord}")
 
 
 def main():
